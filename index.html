@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LockedIn</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1113;--panel:#161a1e;--line:#2a3138;--ink:#e6e9ec;--dim:#8b96a0;--acc:#3a7ac2;--font:Inter,sans-serif;--disp:Fraunces,serif}
+body.bw{--bg:#ffffff;--panel:#f4f4f4;--line:#cccccc;--ink:#111111;--dim:#666666;--acc:#111111}
+body.amber{--bg:#140d04;--panel:#1d130a;--line:#4a3312;--ink:#ffb340;--dim:#9a7434;--acc:#ff9d1c}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);min-height:100vh}
+body.f-serif{--font:Fraunces,serif}
+body.f-mono{--font:'IBM Plex Mono',monospace}
+#wrap{max-width:1020px;margin:0 auto;padding:16px 18px;display:grid;grid-template-columns:250px 1fr 280px;gap:16px}
+nav{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:8px 2px;border-bottom:1px solid var(--line)}
+nav .logo{font-family:var(--disp);font-weight:600;font-size:22px;letter-spacing:.02em}
+nav .logo em{font-style:normal;font-weight:300;color:var(--acc)}
+nav .tag{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--dim)}
+nav .sp{flex:1}
+nav button{background:transparent;border:1px solid var(--line);color:var(--ink);padding:6px 13px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.col h2{font-family:var(--disp);font-weight:600;font-size:15px;margin:0 0 10px}
+.col h2 em{font-style:normal;font-weight:300;color:var(--acc)}
+.lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin:12px 0 5px}
+.sig{display:flex;gap:8px;align-items:center;padding:8px 9px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px;font-size:12.5px}
+.sig input{flex:1;background:transparent;border:none;color:var(--ink);font-size:12.5px;font-family:inherit;outline:none}
+.sig .knob{width:12px;height:12px;border-radius:50%;border:1px solid var(--line);cursor:pointer;flex-shrink:0}
+.sig.hot .knob{background:var(--acc);border-color:var(--acc)}
+#focusBtn{width:100%;background:var(--acc);border:none;color:var(--bg);padding:11px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;margin-top:10px}
+body.bw #focusBtn{color:#fff}
+#clock{text-align:center;padding:8px 0 2px;font-family:'IBM Plex Mono',monospace}
+#clock .t{font-size:30px;color:var(--acc)}
+.post{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;background:var(--panel)}
+.post .who{font-weight:600;font-size:12.5px}
+.post .what{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);margin:1px 0 7px}
+.post p{font-size:12.5px;line-height:1.6;margin:0;color:var(--ink)}
+.post .reactions{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--dim);margin-top:8px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:20}
+#modal .m{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:26px 30px;width:360px;text-align:center}
+#modal h3{font-family:var(--disp);font-weight:600;font-size:22px;margin:0 0 6px}
+#modal p{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);line-height:1.7}
+#modal .row{display:flex;gap:8px;margin-top:14px}
+#modal .row button{flex:1;padding:10px;border-radius:6px;cursor:pointer;font-size:12px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+#modal .yes{background:var(--acc);border:none;color:var(--bg);font-weight:600}
+body.bw #modal .yes{color:#fff}
+#setbox{display:none}
+#setbox label{display:block;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.1em}
+#setbox select,#setbox input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:8px;font-size:12px;font-family:inherit}
+</style></head><body class="">
+<div id="wrap">
+<nav><div class="logo">Locked<em>In</em></div><div class="tag">the professional network for people actually working</div><div class="sp"></div>
+<button id="settings">settings</button></nav>
+<div class="col"><h2>Today&rsquo;s <em>Signal</em></h2>
+<div class="lbl">3-5 critical tasks. the rest is noise.</div>
+<div id="sigs"></div>
+<button id="focusBtn">lock in</button>
+<div id="clock"><div class="t" id="ct">--:--</div><div class="lbl" id="cl">OFF THE CLOCK</div></div></div>
+<div class="col"><h2>The <em>Feed</em></h2><div id="feed"></div></div>
+<div class="col"><h2 id="profh">Your <em>Numbers</em></h2>
+<div class="lbl">focus score</div><div id="fscore" style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:var(--acc)">0</div>
+<div class="lbl">check-ins honored</div><div id="cki" style="font-family:'IBM Plex Mono',monospace;font-size:14px">0 / 0</div>
+<div class="lbl">signal completed</div><div id="sdone" style="font-family:'IBM Plex Mono',monospace;font-size:14px">0</div>
+<div id="setbox"><label>Theme</label><select id="theme"><option value="">Midnight (default)</option><option value="bw">Black &amp; White</option><option value="amber">Amber Terminal</option></select>
+<label>Font</label><select id="font"><option value="">Inter (default)</option><option value="f-serif">Fraunces</option><option value="f-mono">IBM Plex Mono</option></select>
+<label>Check-in interval (min)</label><input id="ival" type="number" value="30" min="5" max="120"></div></div>
+</div>
+<div id="modal"><div class="m"><h3>still locked in?</h3><p id="mq">the network is watching. kindly confirm the grind.</p>
+<div class="row"><button class="yes" id="myes">locked in</button><button id="mno">I drifted</button></div></div></div>
+<script>
+let sigs=['ship the thing you keep polishing','one hard conversation','deep work block, phone in another room'];
+let score=0,ckOk=0,ckAll=0,sdone=0,locking=false,tleft=0,ival=30,checkT=0,timer=null;
+const FEED=[
+['Dana R.','VP of Synergy · 2h','Just crushed my 47th meeting this week. Grateful. Humbled. The calendar is full and so am I.','34 endorsements of "Meetings"'],
+['The Grindset Gazette','newsletter · 4h','Rising at 4am is not enough anymore. Tomorrow we rise at 3:58.','212 claps'],
+['Marcus V.','Thought Leader · 6h','Unpopular opinion: sleep is a series of small naps you take all at once.','98 people found this inspiring'],
+['Priya K.','actually shipped today · 1h','Closed the laptop at 5. Three tasks, all done. No thread about it. Oh wait.','you feel seen'],
+['Humble Braggart','CEO of Hustle · 8h','My 9-year-old asked what I do. I said: I post about working. Silence. Powerful.','45 endorsements of "Silence"']];
+function esc(s){return s.replace(/</g,'&lt;');}
+function renderSigs(){const el=document.getElementById('sigs');el.innerHTML='';
+ sigs.forEach((s,i)=>{const d=document.createElement('div');d.className='sig';
+  d.innerHTML='<div class="knob"></div><input value="'+esc(s)+'">';
+  d.querySelector('input').oninput=e=>{sigs[i]=e.target.value;};
+  d.querySelector('.knob').onclick=()=>{d.classList.toggle('hot');
+   if(d.classList.contains('hot')){sdone++;document.getElementById('sdone').textContent=sdone;
+    score+=15;document.getElementById('fscore').textContent=score;}};
+  el.appendChild(d);});
+ if(sigs.length<5){const b=document.createElement('button');b.textContent='+ add signal';b.style.cssText='width:100%;background:transparent;border:1px dashed var(--line);color:var(--dim);padding:8px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit';
+  b.onclick=()=>{sigs.push('');renderSigs();};el.appendChild(b);}}
+function renderFeed(){const f=document.getElementById('feed');f.innerHTML='';
+ FEED.forEach(([w,wh,p,r])=>{const d=document.createElement('div');d.className='post';
+  d.innerHTML='<div class="who">'+w+'</div><div class="what">'+wh+'</div><p>'+p+'</p><div class="reactions">'+r+'</div>';
+  f.appendChild(d);});}
+document.getElementById('focusBtn').onclick=()=>{
+ locking=true;tleft=25*60;checkT=ival*60;
+ document.getElementById('cl').textContent='LOCKED IN - NEXT CHECK SOON';
+ clearInterval(timer);
+ timer=setInterval(()=>{tleft--;checkT--;
+  document.getElementById('ct').textContent=Math.floor(tleft/60)+':'+String(tleft%60).padStart(2,'0');
+  if(checkT<=0){checkT=ival*60;checkin();}
+  if(tleft<=0){clearInterval(timer);locking=false;
+   document.getElementById('cl').textContent='BLOCK COMPLETE';
+   score+=25;document.getElementById('fscore').textContent=score;}},1000);
+ ping(660);};
+function checkin(){ckAll++;updCk();document.getElementById('modal').style.display='flex';ping(880);}
+document.getElementById('myes').onclick=()=>{ckOk++;score+=10;
+ document.getElementById('fscore').textContent=score;updCk();
+ document.getElementById('modal').style.display='none';ping(990);};
+document.getElementById('mno').onclick=()=>{score=Math.max(0,score-5);
+ document.getElementById('fscore').textContent=score;updCk();
+ document.getElementById('modal').style.display='none';};
+function updCk(){document.getElementById('cki').textContent=ckOk+' / '+ckAll;}
+document.getElementById('settings').onclick=()=>{const b=document.getElementById('setbox');
+ b.style.display=b.style.display==='none'?'block':'none';};
+document.getElementById('theme').onchange=e=>{document.body.className=document.body.className.replace(/\b(bw|amber)\b/g,'').trim();
+ if(e.target.value)document.body.classList.add(e.target.value);};
+document.getElementById('font').onchange=e=>{document.body.classList.remove('f-serif','f-mono');
+ if(e.target.value)document.body.classList.add(e.target.value);};
+document.getElementById('ival').onchange=e=>{ival=Math.max(5,Math.min(120,+e.target.value||30));};
+function ping(f){try{const A=new (window.AudioContext||window.webkitAudioContext)();
+ const o=A.createOscillator(),g=A.createGain();o.frequency.value=f;o.type='sine';
+ g.gain.setValueAtTime(.12,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+.5);
+ o.connect(g).connect(A.destination);o.start();o.stop(A.currentTime+.5);}catch(e){}}
+renderSigs();renderFeed();
+if(location.search.includes('qa=1')){
+ document.body.classList.add('amber');
+ document.getElementById('setbox').style.display='block';
+ score=85;ckOk=3;ckAll=4;sdone=2;
+ document.getElementById('fscore').textContent='85';updCk();document.getElementById('sdone').textContent='2';
+ document.getElementById('ct').textContent='14:32';document.getElementById('cl').textContent='LOCKED IN - NEXT CHECK SOON';
+ document.getElementById('modal').style.display='flex';}
+</script></body></html>
